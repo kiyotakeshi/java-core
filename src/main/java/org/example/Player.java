@@ -12,6 +12,7 @@ public class Player implements Comparable<Player> {
     String name;
     int age;
 
+    // comparable interface override method is good choice to use for defining the default ordering
     @Override
     public int compareTo(Player otherPlayer) {
         // compare(x. y) returns
