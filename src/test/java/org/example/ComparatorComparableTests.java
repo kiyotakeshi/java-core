@@ -14,6 +14,16 @@ class ComparatorComparableTests {
 
     List<Player> footballTeam;
 
+    Employee[] employees;
+
+    Employee[] sortedEmployeesByName;
+    private Employee[] employeesContainsNull;
+    private Employee[] sortedEmployeesByNameWithNullsFirst;
+
+    private Employee[] sameAgeContainsEmployees;
+
+    private Employee[] sortedSameAgeContainsEmployees;
+
     @BeforeEach
     void setUp() {
         footballTeam = Arrays.asList(
@@ -21,6 +31,50 @@ class ComparatorComparableTests {
                 new Player(11, "popcorn", 29),
                 new Player(28, "kendrick", 31)
         );
+
+        employees = new Employee[] {
+                new Employee("mike", 25, 3000, 9922001),
+                new Employee("popcorn", 22, 2000, 5924001),
+                new Employee("kanye", 35, 4000, 3924401)
+        };
+
+        sortedEmployeesByName = new Employee[] {
+                new Employee("kanye", 35, 4000, 3924401),
+                new Employee("mike", 25, 3000, 9922001),
+                new Employee("popcorn", 22, 2000, 5924001)
+        };
+
+        employeesContainsNull = new Employee[] {
+                new Employee("mike", 25, 3000, 9922001),
+                null,
+                new Employee("popcorn", 22, 2000, 5924001),
+                null,
+                new Employee("kanye", 35, 4000, 3924401)
+        };
+
+        sortedEmployeesByNameWithNullsFirst = new Employee[] {
+                null,
+                null,
+                new Employee("kanye", 35, 4000, 3924401),
+                new Employee("mike", 25, 3000, 9922001),
+                new Employee("popcorn", 22, 2000, 5924001)
+        };
+
+        sameAgeContainsEmployees = new Employee[] {
+                new Employee("mike", 25, 3000, 9922001),
+                new Employee("trout", 25, 3000, 9922001),
+                new Employee("kendrick", 25, 5000, 9082001),
+                new Employee("popcorn", 22, 2000, 5924001),
+                new Employee("kanye", 35, 4000, 3924401)
+        };
+
+        sortedSameAgeContainsEmployees = new Employee[] {
+                new Employee("popcorn", 22, 2000, 5924001),
+                new Employee("kendrick", 25, 5000, 9082001),
+                new Employee("mike", 25, 3000, 9922001),
+                new Employee("trout", 25, 3000, 9922001),
+                new Employee("kanye", 35, 4000, 3924401)
+        };
     }
 
     @Test
@@ -32,7 +86,7 @@ class ComparatorComparableTests {
     }
 
     @Test
-    void comparator() {
+    void useComparatorClass() {
         var playerComparator = new PlayerRankingComparator();
         Collections.sort(footballTeam, playerComparator);
         // System.out.println(footballTeam);
@@ -41,7 +95,7 @@ class ComparatorComparableTests {
     }
 
     @Test
-    void comparator2() {
+    void useComparatorClass2() {
         var playerComparator = new PlayerAgeComparator();
         Collections.sort(footballTeam, playerComparator);
         // System.out.println(footballTeam);
@@ -58,5 +112,48 @@ class ComparatorComparableTests {
         // Collections.sort(footballTeam, byRanking);
         footballTeam.sort(byRanking);
         assertThat(footballTeam.get(0).getName()).isEqualTo("popcorn");
+    }
+
+    @Test
+    void comparatorComparing() {
+        Comparator<Employee> nameComparator = Comparator.comparing(Employee::getName);
+        Arrays.sort(employees, nameComparator);
+        assertThat(employees).isEqualTo(sortedEmployeesByName);
+    }
+
+    @Test
+    void comparatorComparingReverse() {
+        Employee[] sortedEmployeesByNameDesc = new Employee[] {
+                new Employee("popcorn", 22, 2000, 5924001),
+                new Employee("mike", 25, 3000, 9922001),
+                new Employee("kanye", 35, 4000, 3924401)
+        };
+
+        // Comparator.comparing(Employee::getName, (e1, e2) -> {return e2.compareTo(e1);});
+        // Comparator<Employee> nameDescComparator = nameComparator.reversed();
+        Comparator<Employee> nameDescComparator = Comparator.comparing(Employee::getName, Comparator.reverseOrder());
+        Arrays.sort(employees, nameDescComparator);
+        assertThat(employees).isEqualTo(sortedEmployeesByNameDesc);
+    }
+
+    @Test
+    void comparatorNaturalOrder() {
+        Comparator<Employee> naturalOrderComparator = Comparator.naturalOrder();
+        Arrays.sort(employees, naturalOrderComparator);
+        assertThat(employees).isEqualTo(sortedEmployeesByName);
+    }
+    @Test
+    void comparatorComparingNullsFirst() {
+        Comparator<Employee> nameComparator = Comparator.comparing(Employee::getName);
+        Comparator<Employee> nameComparatorNullFirst = Comparator.nullsFirst(nameComparator);
+        Arrays.sort(employeesContainsNull, nameComparatorNullFirst);
+        assertThat(employeesContainsNull).isEqualTo(sortedEmployeesByNameWithNullsFirst);
+    }
+
+    @Test
+    void comparatorComparingAgeAndName() {
+        Comparator<Employee> ageNameComparator = Comparator.comparing(Employee::getAge).thenComparing(Employee::getName);
+        Arrays.sort(sameAgeContainsEmployees, ageNameComparator);
+        assertThat(sameAgeContainsEmployees).isEqualTo(sortedSameAgeContainsEmployees);
     }
 }

@@ -1,7 +1,5 @@
 package org.example;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.Value;
 
 // Comparable is an interface defining a strategy of comparing
