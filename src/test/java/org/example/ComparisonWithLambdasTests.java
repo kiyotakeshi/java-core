@@ -7,8 +7,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ComparisonWithLambdasTests {
 
@@ -51,9 +53,39 @@ class ComparisonWithLambdasTests {
         assertThat(humans.get(0).getAge()).isEqualTo(20);
     }
 
-    // TODO: https://www.baeldung.com/java-8-sort-lambda#sort-extracted-comparators
     @Test
-    void name() {
+    void lambadaMultipleConditions() {
+        humans.sort((h1, h2) -> {
+            if (h1.getName().equals(h2.getName())) {
+                return Integer.compare(h1.getAge(), h2.getAge());
+            } else {
+                return h1.getName().compareTo(h2.getName());
+            }
+        });
+        assertThat(humans.get(0).getName()).isEqualTo("amber");
+        assertThat(humans.get(0).getAge()).isEqualTo(20);
+    }
 
+    @Test
+    void multipleComparator() {
+        humans.sort(Comparator.comparing(Human::getName).thenComparing(Human::getAge));
+        assertThat(humans.get(0).getName()).isEqualTo("amber");
+        assertThat(humans.get(0).getAge()).isEqualTo(20);
+    }
+
+    @Test
+    void sortedMethodNeedsElementClassImplementComparableInterface() {
+        assertThatThrownBy(() -> humans.stream().sorted().collect(Collectors.toList()))
+                .isInstanceOf(ClassCastException.class)
+                .hasMessageContaining("class org.example.Human cannot be cast to class java.lang.Comparable (org.example.Human is in unnamed module of loader 'app'; java.lang.Comparable is in module java.base of loader 'bootstrap')");
+    }
+
+    @Test
+    void sortWithCustomComparator() {
+        // Comparator<Human> nameComparator = Comparator.comparing(Human::getName);
+        Comparator<Human> nameComparator = (h1, h2) -> h1.getName().compareTo(h2.getName());
+        List<Human> sortedHumans = humans.stream().sorted(nameComparator).collect(Collectors.toList());
+        assertThat(sortedHumans.get(0).getName()).isEqualTo("amber");
+        assertThat(sortedHumans.get(0).getAge()).isEqualTo(30);
     }
 }
